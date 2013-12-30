@@ -18,8 +18,12 @@
 require 'puppet/application'
 require 'puppet/util/pidlock'
 require 'puppet_library/wrapper'
+require 'puppet_library/server'
 
 class Puppet::Application::Forge < Puppet::Application
+    option("--daemonize", "-D")
+    option("--verbose", "-v")
+
     def preinit
         Signal.trap(:INT) do
             $stderr.puts "Canceling startup"
@@ -28,10 +32,17 @@ class Puppet::Application::Forge < Puppet::Application
     end
 
     def run_command
+        Puppet::Util::Log.level = :debug if options[:verbose]
+
+        library_server = PuppetLibrary::Server.new
+
         pid_file = File.expand_path("library.pid")
+        Puppet.debug "Writing Puppet Forge PID file at #{pid_file}"
         daemon = Puppet::Daemon.new(Puppet::Util::Pidlock.new(pid_file))
-        daemon.server = PuppetLibrary::Wrapper.new
-        daemon.daemonize
+        daemon.server = PuppetLibrary::Wrapper.new(library_server)
+
+        daemon.daemonize if options[:daemonize]
+        Puppet.notice("Starting Puppet Forge")
         daemon.start
     end
 end

@@ -21,3 +21,4 @@ $LOAD_PATH.unshift File.join(dir, 'lib')
 require 'puppet/application/forge'
 require 'puppet'
 require 'rspec'
+require 'pry'

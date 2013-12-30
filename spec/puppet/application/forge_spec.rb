@@ -23,12 +23,14 @@ describe Puppet::Application::Forge do
 
     let(:forge) { Puppet::Application[:forge] }
     let(:daemon) { double('daemon').as_null_object }
+    let(:library_server) { double('library_server') }
     let(:server) { double('server') }
 
     before :each do
         allow(Puppet::Daemon).to receive(:new).and_return(daemon)
         allow(daemon).to receive(:daemonize)
         allow(Puppet::Util::Log).to receive(:newdestination)
+        allow(PuppetLibrary::Server).to receive(:new).and_return(library_server)
         allow(PuppetLibrary::Wrapper).to receive(:new).and_return(server)
     end
 
@@ -42,21 +44,47 @@ describe Puppet::Application::Forge do
 
     describe "starting" do
         it "sets up server" do
+            expect(PuppetLibrary::Wrapper).to receive(:new).with(library_server)
             expect(daemon).to receive(:server=).with(server)
 
             forge.run_command
         end
 
-        it "daemonizes" do
-            expect(daemon).to receive(:daemonize)
+        it "starts in the forground" do
+            expect(daemon).not_to receive(:daemonize)
+            expect(daemon).to receive(:start)
 
             forge.run_command
         end
 
-        it "starts" do
-            expect(daemon).to receive(:start)
+        it "announces itself starting" do
+            expect(Puppet).to receive(:notice).with("Starting Puppet Forge")
 
             forge.run_command
+        end
+
+        context "when --daemonize is specified" do
+            before do
+                forge.handle_daemonize(true)
+            end
+
+            it "daemonizes" do
+                expect(daemon).to receive(:daemonize)
+
+                forge.run_command
+            end
+        end
+
+        context "when --verbose is specified" do
+            before do
+                forge.handle_verbose(true)
+            end
+
+            it "sets the log level to debug" do
+                forge.run_command
+
+                expect(Puppet::Util::Log.level).to eq :debug
+            end
         end
     end
 end
