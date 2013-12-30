@@ -15,9 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH.unshift File.join(dir, 'lib')
+require 'puppet/application'
+require 'puppet/util/pidlock'
+require 'puppet_library/wrapper'
 
-require 'puppet/application/forge'
-require 'puppet'
-require 'rspec'
+class Puppet::Application::Forge < Puppet::Application
+    def preinit
+        Signal.trap(:INT) do
+            $stderr.puts "Canceling startup"
+            exit 0
+        end
+    end
+
+    def run_command
+        pid_file = File.expand_path("library.pid")
+        daemon = Puppet::Daemon.new(Puppet::Util::Pidlock.new(pid_file))
+        daemon.server = PuppetLibrary::Wrapper.new
+        daemon.daemonize
+        daemon.start
+    end
+end
