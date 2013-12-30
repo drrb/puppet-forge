@@ -1,0 +1,7 @@
+name    'drrb-forge'
+version '0.1.0'
+author 'drrb'
+license 'Gnu Public License, Version 3'
+summary 'Private Puppet Forge'
+description 'A Puppet plugin to serve your modules from a private Puppet Forge.'
+project_page 'https://github.com/drrb/puppet-forge'
