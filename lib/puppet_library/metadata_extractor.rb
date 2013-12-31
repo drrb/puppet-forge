@@ -15,21 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH.unshift File.join(dir, 'lib')
+require 'json'
 
-require 'puppet/application/forge'
-require 'puppet'
-require 'rspec'
-require 'pry'
-
-RSpec.configure do |config|
-    config.order = "random"
-end
-
-PuppetLibrary::PuppetModule = Struct.new(:author, :name, :version, :path) do
-    def forge_name
-        "#{author}/#{name}"
+class PuppetLibrary::MetadataExtractor
+    def get_metadata(mod)
+        JSON.parse(File.read(mod.metadata_file))
     end
 end
-

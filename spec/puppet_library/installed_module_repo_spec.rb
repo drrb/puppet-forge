@@ -19,12 +19,6 @@ require 'spec_helper'
 require 'puppet_library/installed_module_repo'
 
 module PuppetLibrary
-    PuppetModule = Struct.new(:author, :name, :version) do
-        def forge_name
-            "#{author}/#{name}"
-        end
-    end
-
     class FakeMetadataExtractor
         def get_metadata(mod)
             { "author" => mod.author, "name" => mod.name, "version" => mod.version }

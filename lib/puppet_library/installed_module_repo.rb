@@ -15,33 +15,38 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-class PuppetLibrary::InstalledModuleRepo
-    def initialize(environment, metadata_extractor, archiver)
-        @environment = environment
-        @metadata_extractor = metadata_extractor
-        @archiver = archiver
-    end
+require 'puppet/node/environment'
+require 'puppet_library/archiver'
+require 'puppet_library/metadata_extractor'
 
-    def get_module(author, name, version)
-        mod = modules(author, name).find do |m|
-            m.version == version
+module PuppetLibrary
+    class InstalledModuleRepo
+        def initialize(environment = Puppet::Node::Environment.new, metadata_extractor = MetadataExtractor.new, archiver = Archiver.new)
+            @environment = environment
+            @metadata_extractor = metadata_extractor
+            @archiver = archiver
         end
-        if mod.nil?
-            nil
-        else
-            @archiver.archive(mod)
-        end
-    end
 
-    def get_metadata(author, name)
-        #TODO: fails for modules with no metadata file
-        modules(author, name).map do |mod|
-            @metadata_extractor.get_metadata(mod)
+        def get_module(author, name, version)
+            mod = modules(author, name).find do |m|
+                m.version == version
+            end
+            if mod.nil?
+                nil
+            else
+                @archiver.archive(mod)
+            end
         end
-    end
 
-    def modules(author, name)
-        #env = Puppet::Node::Environment.new
-        @environment.modules.select {|m| m.forge_name == "#{author}/#{name}"}
+        def get_metadata(author, name)
+            #TODO: fails for modules with no metadata file
+            modules(author, name).map do |mod|
+                @metadata_extractor.get_metadata(mod)
+            end
+        end
+
+        def modules(author, name)
+            @environment.modules.select {|m| m.forge_name == "#{author}/#{name}"}
+        end
     end
 end
