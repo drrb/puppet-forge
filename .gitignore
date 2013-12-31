@@ -1,3 +1,4 @@
 *.sw[op]
 /.bundle
 /Gemfile.lock
+/.rake_t_cache
