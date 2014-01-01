@@ -34,7 +34,7 @@ class Puppet::Application::Forge < Puppet::Application
     def run_command
         Puppet::Util::Log.level = :debug if options[:verbose]
 
-        library_server = PuppetLibrary::Server.new
+        library_server = PuppetLibrary::Server.new(PuppetLibrary::InstalledModuleRepo.new)
 
         pid_file = File.expand_path("library.pid")
         Puppet.debug "Writing Puppet Forge PID file at #{pid_file}"

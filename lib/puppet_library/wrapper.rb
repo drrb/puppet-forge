@@ -27,7 +27,7 @@ module PuppetLibrary
             dispatch = Rack::Builder.app do
                 #TODO: is map '/' required?
                 map '/' do
-                    run @server
+                    run server
                 end
             end
 
