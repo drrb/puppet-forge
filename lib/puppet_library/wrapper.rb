@@ -20,21 +20,26 @@ require 'rack'
 module PuppetLibrary
     class Wrapper
         def initialize(library_server)
-            @rack_server = create_rack_server(library_server)
+            options = {
+                :context => "/",
+                :bind_host => "0.0.0.0",
+                :port => "4567"
+            }
+            @rack_server = create_rack_server(library_server, options)
         end
 
-        def create_rack_server(server)
+        def create_rack_server(server, options)
             dispatch = Rack::Builder.app do
-                #TODO: is map '/' required?
-                map '/' do
+                #TODO: do we really want to support non-root context?
+                map options[:context] do
                     run server
                 end
             end
 
             Rack::Server.new({
                 app: dispatch,
-                Host: "0.0.0.0",
-                Port: "4567"
+                Host: options[:bind_host],
+                Port: options[:port]
             })
         end
 
