@@ -9,7 +9,7 @@ Usage
     $ puppet module install drrb/forge
 
     # Install other modules you want to host
-    $ puppet module install drrb/forge
+    $ puppet module install puppetlabs/apache
 
     # Start the server
     $ puppet forge
